@@ -1,4 +1,4 @@
-# MediaForge — Technical Interview Notes & Engineering Deep Dive
+# MediaFlow — Technical Interview Notes & Engineering Deep Dive
 
 This document captures software engineering fundamentals, architectural trade-offs, and targeted technical interview questions corresponding to MediaForge development.
 
@@ -116,4 +116,24 @@ A shipping container (MP4) can transport different goods (H.264 video and AAC au
   ```
 - When `navButton.color` changes (e.g. during a hover event), the Qt Quick Scene Graph automatically interpolates the RGBA color vectors across the 150ms duration directly on the GPU render thread.
 - This keeps the UI thread free for user interaction and ensures smooth 60–120 FPS transitions.
+- This keeps the UI thread free for user interaction and ensures smooth 60–120 FPS transitions.
+
+---
+
+## 3. Theme System and Reusable QML Components (Phase 3)
+
+### Q11: Why use a QML singleton for theme tokens?
+`Theme.qml` is registered in `qml/theme/qmldir` as a singleton. Pages and controls import the theme directory and bind to semantic properties such as `Theme.surface`, `Theme.fontPageTitle`, and `Theme.spacingLg`. This keeps palette and layout decisions consistent across the application.
+
+### Q12: How does a reusable QML component expose flexible content?
+Components define focused properties and signals for their public API. `Card.qml` exposes title, subtitle, padding, and visual state and uses a default property alias to host caller-provided QML children. This keeps it generic rather than binding it to the Downloader page.
+
+### Q13: How do layouts respond to different window sizes?
+The shell uses `RowLayout`, `ColumnLayout`, `GridLayout`, and attached `Layout` properties instead of fixed coordinates. A compact-width breakpoint collapses the sidebar to an icon rail, and page grids reduce their column count as available width shrinks. Settings uses `ScrollView` for content that can exceed the viewport.
+
+### Q14: How are control states and accessibility handled?
+Controls provide hover, down, enabled, and focus feedback; the primary action also supports a loading state. Interactive items expose accessible names/descriptions, keyboard activation, and visible focus borders. Status badges pair symbols and text with color so status is not communicated by color alone.
+
+### Q15: How is the Python/QML boundary preserved in Phase 3?
+Python configures and launches the Qt engine. QML handles layout, visual state, and input, and may emit local signals such as `fetchMediaRequested`. No bridge or service is connected to that signal in this phase, so no URL validation, network access, file I/O, or media processing occurs.
 

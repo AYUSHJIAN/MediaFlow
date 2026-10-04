@@ -1,74 +1,94 @@
-# MediaForge — Architectural Decision Records (ADR)
+# MediaFlow — Architectural Decision Records (ADR)
 
 ## ADR-001: Selection of PySide6 + Qt Quick / QML over Tkinter / CustomTkinter
 
 ### Context
-Desktop media utilities often rely on basic GUI frameworks like Tkinter or CustomTkinter. However, MediaForge aims to be a professional creator tool with modern hardware-accelerated fluid graphics, smooth animations, customizable dark themes, and high-DPI scaling.
+Desktop media utilities often rely on basic GUI frameworks like Tkinter or CustomTkinter. MediaFlow aims for a professional creator tool with hardware-accelerated graphics, smooth animations, and customizable styling.
 
 ### Decision
 Use **PySide6 (Qt 6) with Qt Quick and QML**.
 
 ### Rationale
-1. **Hardware Acceleration**: Qt Quick uses the Qt Scene Graph (Direct3D on Windows, Metal on macOS, OpenGL/Vulkan on Linux), rendering fluid animations at 60+ FPS without CPU-bound widget redraws.
-2. **Separation of Presentation and Logic**: QML provides a declarative, JSON-like syntax for visual components, keeping UI markup completely detached from Python business logic.
-3. **Professional Look and Feel**: Tkinter relies on antiquated OS native widgets that look out of place in creative software suites. CustomTkinter improves appearance but suffers from limited layout flexibility, absence of hardware acceleration, and sluggish redraws during high-frequency updates (e.g. download progress).
-4. **Rich Type Marshaling**: PySide6 features first-class Python ↔ C++ / QML bridge capabilities (`@Property`, `@Signal`, `@Slot`), facilitating clean async communication.
+1. Qt Quick uses the Qt Scene Graph for accelerated rendering without CPU-bound widget redraws.
+2. QML provides a declarative presentation layer separate from Python business logic.
+3. Qt Quick supports flexible layouts, animations, and consistent custom styling.
+4. PySide6 provides Python/QML bridge capabilities through `@Property`, `@Signal`, and `@Slot`.
 
 ---
 
-## ADR-002: Layered Service & Bridge Architecture
+## ADR-002: Layered Service and Bridge Architecture
 
 ### Context
-A common anti-pattern in desktop applications is coupling GUI event handlers directly with network calls, disk operations, or subprocess execution. This makes code untestable, difficult to maintain, and prone to freezing the UI.
+Coupling GUI event handlers directly to network calls, disk operations, or subprocess execution makes code difficult to test and can freeze the interface.
 
 ### Decision
-Enforce a four-tier architecture:
-`QML Presentation` → `PySide6 Bridge (QObject)` → `Python Service Layer` → `System/External Engines`.
+Enforce the four-tier architecture: `QML Presentation` → `PySide6 Bridge (QObject)` → `Python Service Layer` → `System/External Engines`.
 
 ### Rationale
-1. **Testability**: The backend service layer has zero dependencies on Qt or GUI classes. Services can be verified with standard headless `pytest` tests without instantiating `QGuiApplication`.
-2. **Flexibility**: If the UI technology is ever swapped or adapted, the core media processing services remain completely untouched.
-3. **Clarity**: Each component has one distinct responsibility.
+1. Backend services can be tested without launching a Qt GUI.
+2. The media services remain independent if the UI technology changes.
+3. Each layer has a distinct responsibility and boundary.
 
 ---
 
 ## ADR-003: Subprocess Argument Lists for FFmpeg vs Shell Strings
 
 ### Context
-Executing external tools like FFmpeg can be done via `shell=True` or by passing a list of distinct arguments (`argv`). Shell string concatenation often leads to severe security risks (shell injection) and escaping bugs on filenames containing spaces, quotes, or special unicode characters.
+Shell string concatenation creates injection risks and escaping bugs for filenames with spaces, quotes, or special characters.
 
 ### Decision
-Always use discrete argument lists (`list[str]`) with `subprocess.Popen` or `subprocess.run`, and keep `shell=False`.
+Use discrete argument lists (`list[str]`) with `subprocess.Popen` or `subprocess.run`, and keep `shell=False`.
 
 ### Rationale
-1. **Security**: Eliminates command injection vectors completely.
-2. **Robustness**: Arguments are passed directly to the operating system's `CreateProcessW` API on Windows, ensuring that filenames with spaces, ampersands, or apostrophes are safely handled without fragile manual string quoting.
+1. Argument lists avoid shell command injection.
+2. The operating system receives each argument directly, avoiding fragile platform-specific quoting.
 
 ---
 
 ## ADR-004: Native Pathlib Usage over os.path
 
 ### Context
-Windows and Unix systems differ in path separators (`\` vs `/`), drive letters, and forbidden characters. String concatenation of paths is fragile.
+Windows and Unix differ in path separators, drive letters, and forbidden characters. String concatenation of paths is fragile.
 
 ### Decision
-Standardize exclusively on Python's `pathlib.Path` across the entire codebase.
+Standardize on Python's `pathlib.Path` across the codebase.
 
 ### Rationale
-1. Object-oriented path manipulation provides cleaner, safer path resolutions (`path / "subfolder"`).
-2. Built-in methods for extension inspection (`.suffix`), stem extraction (`.stem`), parent resolution (`.parent`), and directory creation (`.mkdir(parents=True, exist_ok=True)`).
-3. Automatic conversion to proper OS path formats.
+1. Object-oriented path manipulation provides safe resolution and filesystem operations.
+2. The `/` operator handles path separators across operating systems.
+3. Extension, stem, parent, and directory-creation methods are available directly on path objects.
 
 ---
 
 ## ADR-005: yt-dlp Python API with Non-Downloading Metadata Inspection
 
 ### Context
-Media download utilities frequently either parse CLI stdout/stderr using regex or download the entire media file before checking properties.
+Parsing CLI output is fragile, and downloading an entire file just to inspect it is wasteful.
 
 ### Decision
-Use `yt_dlp.YoutubeDL` directly via its Python API, leveraging `extract_info(url, download=False)` for metadata retrieval before user confirmation.
+Use `yt_dlp.YoutubeDL` and `extract_info(url, download=False)` for future metadata retrieval before user confirmation.
 
 ### Rationale
-1. **Performance**: Inspecting stream formats, thumbnails, and durations in-memory takes hundreds of milliseconds, enabling instant UI previews before committing to multi-gigabyte downloads.
-2. **Reliability**: Structured dictionary responses from the API are vastly more reliable than scraping command-line text output, which frequently changes across minor versions.
+1. Metadata can be inspected in memory before committing to a potentially large download.
+2. Structured dictionary responses are more reliable than scraping command-line text.
+
+---
+
+## ADR-006: Centralized QML Theme and Reusable UI Components
+
+### Context
+Repeated literal colors, font sizes, spacing, and control markup make visual changes inconsistent and responsive/accessibility improvements expensive to maintain.
+
+### Decision
+Use the `Theme.qml` singleton, registered through `qml/theme/qmldir`, as the source of palette, semantic typography, spacing, radii, and animation tokens. Put repeated shell and page patterns in reusable QML components under `qml/components/`; pages compose them but own no media-processing behavior.
+
+### Rationale
+1. A single token source keeps contrast, typography, and spacing decisions consistent across all views.
+2. QML components expose focused properties and signals while preserving declarative layout and keyboard/accessibility behavior.
+3. Width-aware `Layout` values and grid breakpoints keep content usable without fixed absolute positioning.
+4. Qt Quick Controls Basic is selected at application startup because it supports the custom backgrounds and content items required by the MediaFlow visual system.
+
+### Consequences
+- QML owns presentation state and emits UI signals; no downloader, converter, persistence, or settings service is invoked by these components.
+- Theme changes belong in `Theme.qml`, not as local color literals in pages.
+- The application bootstrap selects the Basic Controls style before `QGuiApplication` is created.

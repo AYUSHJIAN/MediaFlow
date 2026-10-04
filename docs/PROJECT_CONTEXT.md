@@ -42,6 +42,6 @@
   - Status Error: `#FF5C68`
 
 ## Current Status
-- **Current Phase**: Phase 2 — PySide6 + QML Application Shell (Complete)
-- **Milestone Achieved**: Application shell operational with interactive sidebar navigation rail, dynamic StackLayout view router, 4 dedicated workstation pages (Downloader, Converter, History, Settings), and comprehensive test suite.
-- **Next Milestone**: Phase 3 — Theme and Reusable UI Components.
+- **Current Phase**: Phase 3 — Theme System and Reusable UI Components (Complete)
+- **Milestone Achieved**: Centralized QML palette, typography, spacing, radii, and animation tokens; reusable shell/page controls; adaptive layouts; and UI-only placeholder actions across the four workstation destinations.
+- **Next Milestone**: Phase 4 — Downloader Metadata Service. URL validation and metadata extraction are not part of this milestone.

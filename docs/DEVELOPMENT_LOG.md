@@ -36,4 +36,27 @@
    - Verified end-to-end smoke test execution with `python app.py --test-run`.
 
 ### Next Milestone
-- Phase 3: Theme and Reusable Components (Centralized `Theme.qml` singleton, reusable buttons, cards, status pills, and text inputs).
+- Phase 3: Theme and Reusable Components.
+
+## 2026-10-04 — Phase 3: Theme System and Reusable UI Components
+
+### Objectives
+- Centralize visual tokens and remove per-page color and spacing duplication.
+- Keep the four navigation destinations while making shared controls responsive and accessible.
+- Keep media-related actions as UI placeholders with no backend service connection.
+
+### Actions & Changes
+- Completed the `Theme.qml` singleton for the specified palette, semantic typography, spacing, corner radii, and animation durations.
+- Added `AppSidebar`, `TopBar`, `PageContainer`, `SectionHeader`, `PrimaryButton`, `SecondaryButton`, `Card`, `TextInputField`, `StatusBadge`, `EmptyState`, and `FileDropZone` components.
+- Migrated all four pages to theme tokens and reusable components; added compact navigation and responsive card/grid layouts.
+- Kept Fetch Media and Browse Files as unconnected UI actions. Placeholder copy makes future yt-dlp, FFmpeg, history, and settings services explicit.
+- Selected Qt Quick Controls Basic style at application startup for consistent custom control styling.
+- Added component compilation and offscreen interaction checks for resizing, pressed navigation, page switching, and the Downloader placeholder signal.
+
+### Verification
+- `tests/test_app_shell.py`: 6 tests passed, including page/component instantiation and navigation/action interactions.
+- Full suite: 11 tests passed; `app.py --test-run` launched the Qt event loop and exited cleanly.
+- Hover styling is configured, but the offscreen Windows platform plugin did not generate hover events for automated assertions.
+
+### Next Milestone
+- Phase 4: Downloader Metadata Service. Phase 3 intentionally does not validate URLs or contact yt-dlp.

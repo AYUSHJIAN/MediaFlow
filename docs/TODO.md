@@ -1,4 +1,4 @@
-# MediaForge — Development Roadmap & TODO
+# MediaFlow — Development Roadmap & TODO
 
 ## Phase Breakdown
 
@@ -17,10 +17,12 @@
   - [x] Modular page views in qml/pages/ (Downloader, Converter, History, Settings)
   - [x] Automated QML compilation & navigation tests (tests/test_app_shell.py)
 
-- [ ] **PHASE 3: Theme and Reusable Components**
-  - [ ] Centralized QML Theme singleton (`Theme.qml`)
-  - [ ] Reusable UI components (CustomButton, Card, InputField, StatusPill, Tooltip)
-  - [ ] Hover states, focus rings, accessibility considerations
+- [x] **PHASE 3: Theme and Reusable Components**
+  - [x] Centralized QML Theme singleton (`Theme.qml`) with palette, typography, spacing, radius, and animation tokens
+  - [x] Reusable shell/page components (AppSidebar, TopBar, buttons, Card, TextInputField, SectionHeader, StatusBadge, EmptyState, FileDropZone, PageContainer)
+  - [x] Focus, enabled, pressed, hover, and loading states where applicable; accessible names and keyboard navigation
+  - [x] Responsive shell and page layouts with compact navigation and width-aware grids
+  - [x] QML compile, component instantiation, resize, navigation, and placeholder-action tests
 
 - [ ] **PHASE 4: Downloader Metadata Service**
   - [ ] Safe URL validation (YouTube, Instagram, Pinterest)

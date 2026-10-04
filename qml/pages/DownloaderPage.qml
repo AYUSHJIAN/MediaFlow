@@ -1,231 +1,126 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import "../components"
+import "../theme"
 
-Item {
+PageContainer {
     id: downloaderPage
+    objectName: "downloaderPage"
 
-    ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: 28
-        spacing: 20
+    signal fetchMediaRequested(string url)
 
-        // Page Header
-        ColumnLayout {
-            spacing: 4
-            Text {
-                text: "MEDIA DOWNLOADER"
-                font.pixelSize: 11
-                font.bold: true
-                color: "#7C5CFF"
-            }
-            Text {
-                text: "Download & Extract Online Media"
-                font.pixelSize: 22
-                font.bold: true
-                color: "#F5F7FA"
-            }
-            Text {
-                text: "Ingest high-fidelity media from YouTube, Instagram, and Pinterest using yt-dlp."
-                font.pixelSize: 13
-                color: "#8B93A1"
-            }
-        }
+    SectionHeader {
+        eyebrow: "MEDIA DOWNLOADER"
+        title: "Download & Extract Online Media"
+        description: "Paste a media link to begin. Media lookup is not connected in this UI phase."
+    }
 
-        // URL Input Simulation / Placeholder Card
-        Rectangle {
-            Layout.fillWidth: true
-            implicitHeight: 90
-            radius: 10
-            color: "#111318"
-            border.color: "#292E36"
-            border.width: 1
+    Card {
+        Layout.fillWidth: true
+        implicitHeight: inputLayout.implicitHeight + Theme.spacingLg * 2
 
-            RowLayout {
-                anchors.fill: parent
-                anchors.margins: 18
-                spacing: 16
-
-                Rectangle {
-                    width: 38
-                    height: 38
-                    radius: 8
-                    color: "#181B22"
-                    border.color: "#292E36"
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "🔗"
-                        font.pixelSize: 16
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 4
-                    Text {
-                        text: "Media Ingestion Bar (Phase 4 Metadata Service)"
-                        font.pixelSize: 14
-                        font.bold: true
-                        color: "#F5F7FA"
-                    }
-                    Text {
-                        text: "Paste a media URL to fetch resolutions, audio streams, and metadata in-memory."
-                        font.pixelSize: 12
-                        color: "#8B93A1"
-                    }
-                }
-
-                Rectangle {
-                    implicitWidth: 110
-                    implicitHeight: 36
-                    radius: 6
-                    color: "#7C5CFF"
-                    opacity: 0.85
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "Fetch Media"
-                        color: "#FFFFFF"
-                        font.pixelSize: 12
-                        font.bold: true
-                    }
-                }
-            }
-        }
-
-        // Workstation Content Placeholder Cards
         RowLayout {
+            id: inputLayout
+            anchors.fill: parent
+            anchors.margins: Theme.spacingMd
+            spacing: Theme.spacingMd
+
+            TextInputField {
+                id: mediaUrlField
+                objectName: "mediaUrlField"
+                Layout.fillWidth: true
+                label: "Media URL"
+                placeholderText: "Paste a media link"
+                inputMethodHints: Qt.ImhUrlCharactersOnly
+                onAccepted: fetchMediaButton.clicked()
+            }
+
+            PrimaryButton {
+                id: fetchMediaButton
+                objectName: "fetchMediaButton"
+                Layout.alignment: Qt.AlignBottom
+                text: "Fetch Media"
+                icon: "↗"
+                onClicked: downloaderPage.fetchMediaRequested(mediaUrlField.text)
+            }
+        }
+    }
+
+    GridLayout {
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        columns: downloaderPage.width < 1040 ? 1 : 2
+        columnSpacing: Theme.spacingMd
+        rowSpacing: Theme.spacingMd
+
+        Card {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            spacing: 16
+            Layout.preferredWidth: 6
+            Layout.minimumHeight: 190
 
-            // Left Card: Media Preview & Stream Selector
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.preferredWidth: 6
-                radius: 10
-                color: "#111318"
-                border.color: "#292E36"
-                border.width: 1
+            EmptyState {
+                anchors.centerIn: parent
+                icon: "▶"
+                title: "No Media Loaded"
+                description: "Media details and stream choices will appear here after a future metadata phase."
+            }
+        }
 
-                ColumnLayout {
-                    anchors.centerIn: parent
-                    spacing: 12
+        Card {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.preferredWidth: 4
+            Layout.minimumHeight: 190
+            title: "Download options"
+            subtitle: "Preview only; download services are not connected."
 
-                    Rectangle {
-                        Layout.alignment: Qt.AlignHCenter
-                        width: 56
-                        height: 56
-                        radius: 28
-                        color: "#181B22"
-                        border.color: "#292E36"
+            ColumnLayout {
+                anchors.fill: parent
+                spacing: Theme.spacingSm
 
+                Repeater {
+                    model: [
+                        { title: "Format", detail: "MP4 video / MP3 audio" },
+                        { title: "Quality", detail: "Preference selection planned" },
+                        { title: "Destination", detail: "./downloads/" },
+                        { title: "Filename", detail: "Automatic naming planned" }
+                    ]
+                    delegate: RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Theme.spacingSm
                         Text {
-                            anchors.centerIn: parent
-                            text: "🎬"
-                            font.pixelSize: 24
+                            text: "•"
+                            color: Theme.primary
+                            font.pixelSize: Theme.fontBody
                         }
-                    }
-
-                    Text {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: "No Media Loaded"
-                        font.pixelSize: 16
-                        font.bold: true
-                        color: "#F5F7FA"
-                    }
-
-                    Text {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: "Enter a supported media URL above to inspect formats and stream details."
-                        font.pixelSize: 12
-                        color: "#8B93A1"
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Theme.spacingXs
+                            Text {
+                                text: modelData.title
+                                color: Theme.textPrimary
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontBody
+                                font.weight: Theme.weightSectionHeading
+                            }
+                            Text {
+                                text: modelData.detail
+                                color: Theme.textMuted
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontMetadata
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                            }
+                        }
                     }
                 }
-            }
 
-            // Right Card: Download Configuration & Options
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.preferredWidth: 4
-                radius: 10
-                color: "#111318"
-                border.color: "#292E36"
-                border.width: 1
-
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 20
-                    spacing: 14
-
-                    Text {
-                        text: "DOWNLOAD OPTIONS"
-                        font.pixelSize: 11
-                        font.bold: true
-                        color: "#00D4FF"
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        height: 1
-                        color: "#292E36"
-                    }
-
-                    Repeater {
-                        model: [
-                            { title: "Format Selection", desc: "MP4 Video / MP3 Audio" },
-                            { title: "Quality Preference", desc: "Best Available (Up to 4K)" },
-                            { title: "Save Destination", desc: "./downloads/" },
-                            { title: "Filename Pattern", desc: "Auto-sanitized title" }
-                        ]
-
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 12
-
-                            Rectangle {
-                                width: 6
-                                height: 6
-                                radius: 3
-                                color: "#7C5CFF"
-                            }
-
-                            ColumnLayout {
-                                spacing: 2
-                                Text {
-                                    text: modelData.title
-                                    font.pixelSize: 13
-                                    font.weight: Font.DemiBold
-                                    color: "#F5F7FA"
-                                }
-                                Text {
-                                    text: modelData.desc
-                                    font.pixelSize: 11
-                                    color: "#8B93A1"
-                                }
-                            }
-                        }
-                    }
-
-                    Item { Layout.fillHeight: true }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        implicitHeight: 40
-                        radius: 6
-                        color: "#181B22"
-                        border.color: "#292E36"
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Awaiting Media URL..."
-                            font.pixelSize: 12
-                            color: "#8B93A1"
-                        }
-                    }
+                Item { Layout.fillHeight: true }
+                StatusBadge {
+                    text: "Awaiting media link"
+                    status: "neutral"
                 }
             }
         }

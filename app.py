@@ -5,9 +5,10 @@ resolves filesystem resources safely via pathlib, and instantiates
 the main QML interface engine.
 """
 
+import os
 import sys
 from pathlib import Path
-from PySide6.QtCore import QUrl, Qt
+from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
@@ -18,9 +19,10 @@ def main() -> int:
     """Launch the MediaFlow desktop application."""
     # 1. Initialize application logging
     logger = setup_logging()
-    logger.info("Starting MediaFlow Desktop Workstation (Phase 2 Application Shell)")
+    logger.info("Starting MediaFlow Desktop Workstation (Phase 3 UI Foundation)")
 
     # 2. Configure Qt application properties
+    os.environ.setdefault("QT_QUICK_CONTROLS_STYLE", "Basic")
     app = QGuiApplication(sys.argv)
     app.setApplicationName("MediaFlow")
     app.setOrganizationName("MediaFlow")
@@ -56,10 +58,11 @@ def main() -> int:
     # Smoke testing convenience: auto-exit if requested
     if "--test-run" in sys.argv:
         from PySide6.QtCore import QTimer
+
         logger.info("Test-run flag detected: scheduling auto-close in 1000ms.")
         QTimer.singleShot(1000, app.quit)
 
-    logger.info("MediaForge initialized successfully. Entering Qt event loop.")
+    logger.info("MediaFlow initialized successfully. Entering Qt event loop.")
     return app.exec()
 
 
