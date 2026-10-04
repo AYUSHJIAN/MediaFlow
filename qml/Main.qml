@@ -2,18 +2,29 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
+import "pages"
 
 ApplicationWindow {
     id: rootWindow
     visible: true
-    width: 1080
-    height: 720
-    minimumWidth: 800
-    minimumHeight: 600
-    title: "MediaForge — Professional Creator Workstation"
+    width: 1160
+    height: 760
+    minimumWidth: 920
+    minimumHeight: 640
+    title: "MediaFlow — Professional Creator Workstation"
     color: "#08090C"
 
-    // Top Navigation / Header
+    // Application Navigation State
+    property int currentNavIndex: 0
+
+    readonly property var navItems: [
+        { name: "Downloader", icon: "⬇️", subtitle: "Ingest Online Media" },
+        { name: "Converter", icon: "🔄", subtitle: "Transcode & Remux" },
+        { name: "History", icon: "📜", subtitle: "Activity Log" },
+        { name: "Settings", icon: "⚙️", subtitle: "Preferences & Engines" }
+    ]
+
+    // Top Workstation Header Bar
     header: ToolBar {
         background: Rectangle {
             color: "#111318"
@@ -30,17 +41,17 @@ ApplicationWindow {
 
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: 24
-            anchors.rightMargin: 24
+            anchors.leftMargin: 20
+            anchors.rightMargin: 20
             spacing: 16
 
-            // App Brand
+            // Application Brand & Glyph
             RowLayout {
                 spacing: 10
                 Rectangle {
-                    width: 28
-                    height: 28
-                    radius: 6
+                    width: 30
+                    height: 30
+                    radius: 7
                     gradient: Gradient {
                         GradientStop { position: 0.0; color: "#7C5CFF" }
                         GradientStop { position: 1.0; color: "#00D4FF" }
@@ -48,34 +59,68 @@ ApplicationWindow {
 
                     Text {
                         anchors.centerIn: parent
-                        text: "M"
-                        font.pixelSize: 16
+                        text: "MF"
+                        font.pixelSize: 13
                         font.bold: true
                         color: "#FFFFFF"
                     }
                 }
 
                 Text {
-                    text: "MediaForge"
+                    text: "MediaFlow"
                     font.pixelSize: 18
                     font.bold: true
                     color: "#F5F7FA"
                 }
 
+                Rectangle {
+                    implicitWidth: studioTxt.implicitWidth + 10
+                    implicitHeight: 18
+                    radius: 4
+                    color: "#181B22"
+                    border.color: "#7C5CFF"
+                    border.width: 1
+
+                    Text {
+                        id: studioTxt
+                        anchors.centerIn: parent
+                        text: "STUDIO"
+                        font.pixelSize: 9
+                        font.bold: true
+                        color: "#7C5CFF"
+                    }
+                }
+            }
+
+            Rectangle {
+                width: 1
+                height: 20
+                color: "#292E36"
+                Layout.leftMargin: 4
+                Layout.rightMargin: 4
+            }
+
+            // Current Active View Breadcrumb
+            RowLayout {
+                spacing: 6
                 Text {
-                    text: "STUDIO"
-                    font.pixelSize: 10
-                    font.bold: true
-                    color: "#7C5CFF"
-                    Layout.alignment: Qt.AlignVCenter
+                    text: rootWindow.navItems[rootWindow.currentNavIndex].name.toUpperCase()
+                    font.pixelSize: 12
+                    font.weight: Font.DemiBold
+                    color: "#F5F7FA"
+                }
+                Text {
+                    text: "• " + rootWindow.navItems[rootWindow.currentNavIndex].subtitle
+                    font.pixelSize: 11
+                    color: "#8B93A1"
                 }
             }
 
             Item { Layout.fillWidth: true }
 
-            // Phase Status Badge
+            // Phase Status Indicator Badge
             Rectangle {
-                implicitWidth: badgeRow.implicitWidth + 20
+                implicitWidth: badgeLayout.implicitWidth + 20
                 implicitHeight: 28
                 radius: 14
                 color: "#181B22"
@@ -83,7 +128,7 @@ ApplicationWindow {
                 border.width: 1
 
                 RowLayout {
-                    id: badgeRow
+                    id: badgeLayout
                     anchors.centerIn: parent
                     spacing: 6
 
@@ -95,7 +140,7 @@ ApplicationWindow {
                     }
 
                     Text {
-                        text: "Phase 1: Foundation Ready"
+                        text: "Phase 2: Shell Active"
                         color: "#F5F7FA"
                         font.pixelSize: 12
                         font.weight: Font.DemiBold
@@ -105,236 +150,181 @@ ApplicationWindow {
         }
     }
 
-    // Main Workstation Canvas
-    ScrollView {
+    // Main Workstation Body: Sidebar Navigation + Content Area
+    RowLayout {
         anchors.fill: parent
-        anchors.margins: 32
-        contentWidth: mainCol.width
-        clip: true
+        spacing: 0
 
-        ColumnLayout {
-            id: mainCol
-            width: rootWindow.width - 64
-            spacing: 24
+        // Navigation Sidebar
+        Rectangle {
+            id: sidebar
+            Layout.preferredWidth: 220
+            Layout.fillHeight: true
+            color: "#111318"
+            border.color: "#292E36"
+            border.width: 1
 
-            // Welcome / Hero Banner
-            Rectangle {
-                Layout.fillWidth: true
-                implicitHeight: 130
-                radius: 12
-                color: "#111318"
-                border.color: "#292E36"
-                border.width: 1
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.topMargin: 16
+                anchors.bottomMargin: 16
+                spacing: 6
 
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 24
-                    spacing: 8
+                // Section Label
+                Text {
+                    text: "WORKSTATION NAVIGATION"
+                    font.pixelSize: 10
+                    font.bold: true
+                    color: "#8B93A1"
+                    Layout.leftMargin: 18
+                    Layout.topMargin: 8
+                    Layout.bottomMargin: 8
+                }
+
+                // Navigation Items Repeater
+                Repeater {
+                    model: rootWindow.navItems
+
+                    Rectangle {
+                        id: navButton
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 10
+                        Layout.rightMargin: 10
+                        implicitHeight: 44
+                        radius: 8
+
+                        readonly property bool isCurrent: rootWindow.currentNavIndex === index
+                        readonly property bool isHovered: navMouseArea.containsMouse
+
+                        color: isCurrent ? "#181B22" : (isHovered ? "#14171E" : "transparent")
+                        border.color: isCurrent ? "#7C5CFF" : (isHovered ? "#292E36" : "transparent")
+                        border.width: 1
+
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                        Behavior on border.color { ColorAnimation { duration: 150 } }
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 12
+                            anchors.rightMargin: 12
+                            spacing: 12
+
+                            // Left selection indicator accent pill
+                            Rectangle {
+                                width: 3
+                                height: 18
+                                radius: 1.5
+                                color: navButton.isCurrent ? "#7C5CFF" : "transparent"
+                            }
+
+                            Text {
+                                text: modelData.icon
+                                font.pixelSize: 14
+                            }
+
+                            Text {
+                                text: modelData.name
+                                font.pixelSize: 13
+                                font.weight: navButton.isCurrent ? Font.DemiBold : Font.Normal
+                                color: navButton.isCurrent ? "#F5F7FA" : "#8B93A1"
+                                Layout.fillWidth: true
+                            }
+                        }
+
+                        MouseArea {
+                            id: navMouseArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                rootWindow.currentNavIndex = index
+                            }
+                        }
+                    }
+                }
+
+                Item { Layout.fillHeight: true }
+
+                // Sidebar Footer: Creator Mode Badge
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 14
+                    Layout.rightMargin: 14
+                    implicitHeight: 52
+                    radius: 8
+                    color: "#181B22"
+                    border.color: "#292E36"
+                    border.width: 1
 
                     RowLayout {
-                        spacing: 8
-                        Text {
-                            text: "CREATOR MEDIA WORKSTATION"
-                            font.pixelSize: 11
-                            font.weight: Font.Bold
-                            color: "#00D4FF"
-                        }
-                    }
-
-                    Text {
-                        text: "Professional Media Ingestion, Transcoding & Asset Pipeline"
-                        font.pixelSize: 20
-                        font.bold: true
-                        color: "#F5F7FA"
-                    }
-
-                    Text {
-                        text: "Architecture initialized with PySide6, Qt Quick, modular Python service layer, and strict separation of concerns."
-                        font.pixelSize: 13
-                        color: "#8B93A1"
-                    }
-                }
-            }
-
-            // Section Label
-            Text {
-                text: "SYSTEM MODULES"
-                font.pixelSize: 12
-                font.weight: Font.Bold
-                color: "#8B93A1"
-            }
-
-            // Workstation Capability Grid
-            GridLayout {
-                Layout.fillWidth: true
-                columns: 2
-                columnSpacing: 16
-                rowSpacing: 16
-
-                // Module 1: Downloader
-                Rectangle {
-                    Layout.fillWidth: true
-                    implicitHeight: 110
-                    radius: 10
-                    color: "#111318"
-                    border.color: "#292E36"
-                    border.width: 1
-
-                    ColumnLayout {
                         anchors.fill: parent
-                        anchors.margins: 18
-                        spacing: 6
+                        anchors.margins: 10
+                        spacing: 10
 
-                        RowLayout {
-                            spacing: 8
-                            Rectangle {
-                                width: 8
-                                height: 8
-                                radius: 4
-                                color: "#7C5CFF"
-                            }
+                        Rectangle {
+                            width: 28
+                            height: 28
+                            radius: 14
+                            color: "#08090C"
+                            border.color: "#292E36"
+
                             Text {
-                                text: "Downloader Engine"
-                                font.pixelSize: 15
+                                anchors.centerIn: parent
+                                text: "⚡"
+                                font.pixelSize: 12
+                            }
+                        }
+
+                        ColumnLayout {
+                            spacing: 1
+                            Text {
+                                text: "Creator Mode"
+                                font.pixelSize: 11
                                 font.bold: true
                                 color: "#F5F7FA"
                             }
-                        }
-
-                        Text {
-                            text: "yt-dlp Python integration with in-memory metadata extraction, format resolution, and progress tracking."
-                            font.pixelSize: 12
-                            color: "#8B93A1"
-                            Layout.fillWidth: true
-                            wrapMode: Text.WordWrap
-                        }
-                    }
-                }
-
-                // Module 2: Converter
-                Rectangle {
-                    Layout.fillWidth: true
-                    implicitHeight: 110
-                    radius: 10
-                    color: "#111318"
-                    border.color: "#292E36"
-                    border.width: 1
-
-                    ColumnLayout {
-                        anchors.fill: parent
-                        anchors.margins: 18
-                        spacing: 6
-
-                        RowLayout {
-                            spacing: 8
-                            Rectangle {
-                                width: 8
-                                height: 8
-                                radius: 4
-                                color: "#00D4FF"
-                            }
                             Text {
-                                text: "Converter & Transcoder"
-                                font.pixelSize: 15
-                                font.bold: true
-                                color: "#F5F7FA"
+                                text: "Local Media Processing"
+                                font.pixelSize: 10
+                                color: "#8B93A1"
                             }
-                        }
-
-                        Text {
-                            text: "FFmpeg media processing engine for audio extraction (MP4 → MP3) and container remuxing/transcoding (MP4 ↔ MOV)."
-                            font.pixelSize: 12
-                            color: "#8B93A1"
-                            Layout.fillWidth: true
-                            wrapMode: Text.WordWrap
-                        }
-                    }
-                }
-
-                // Module 3: Filesystem & Safety
-                Rectangle {
-                    Layout.fillWidth: true
-                    implicitHeight: 110
-                    radius: 10
-                    color: "#111318"
-                    border.color: "#292E36"
-                    border.width: 1
-
-                    ColumnLayout {
-                        anchors.fill: parent
-                        anchors.margins: 18
-                        spacing: 6
-
-                        RowLayout {
-                            spacing: 8
-                            Rectangle {
-                                width: 8
-                                height: 8
-                                radius: 4
-                                color: "#35D39A"
-                            }
-                            Text {
-                                text: "Filesystem & Security"
-                                font.pixelSize: 15
-                                font.bold: true
-                                color: "#F5F7FA"
-                            }
-                        }
-
-                        Text {
-                            text: "Object-oriented pathlib architecture, filename sanitization, collision resolution, and path traversal prevention."
-                            font.pixelSize: 12
-                            color: "#8B93A1"
-                            Layout.fillWidth: true
-                            wrapMode: Text.WordWrap
-                        }
-                    }
-                }
-
-                // Module 4: History & Config
-                Rectangle {
-                    Layout.fillWidth: true
-                    implicitHeight: 110
-                    radius: 10
-                    color: "#111318"
-                    border.color: "#292E36"
-                    border.width: 1
-
-                    ColumnLayout {
-                        anchors.fill: parent
-                        anchors.margins: 18
-                        spacing: 6
-
-                        RowLayout {
-                            spacing: 8
-                            Rectangle {
-                                width: 8
-                                height: 8
-                                radius: 4
-                                color: "#FFB547"
-                            }
-                            Text {
-                                text: "History & Storage"
-                                font.pixelSize: 15
-                                font.bold: true
-                                color: "#F5F7FA"
-                            }
-                        }
-
-                        Text {
-                            text: "SQLite persistent operational log and JSON user configuration management."
-                            font.pixelSize: 12
-                            color: "#8B93A1"
-                            Layout.fillWidth: true
-                            wrapMode: Text.WordWrap
                         }
                     }
                 }
             }
         }
+
+        // Central Multi-View Content Container
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            color: "#08090C"
+
+            StackLayout {
+                id: contentStack
+                anchors.fill: parent
+                currentIndex: rootWindow.currentNavIndex
+
+                DownloaderPage {
+                    id: downloaderView
+                }
+
+                ConverterPage {
+                    id: converterView
+                }
+
+                HistoryPage {
+                    id: historyView
+                }
+
+                SettingsPage {
+                    id: settingsView
+                }
+            }
+        }
     }
 
-    // Status Footer
+    // Workstation Footer Status Bar
     footer: ToolBar {
         background: Rectangle {
             color: "#08090C"
@@ -344,11 +334,11 @@ ApplicationWindow {
 
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: 24
-            anchors.rightMargin: 24
+            anchors.leftMargin: 20
+            anchors.rightMargin: 20
 
             Text {
-                text: "PySide6 (Qt 6) • QML Hardware-Accelerated Viewport • Python 3"
+                text: "PySide6 (Qt 6) • Hardware-Accelerated Qt Quick Engine • StackLayout Router"
                 font.pixelSize: 11
                 color: "#8B93A1"
             }
@@ -356,7 +346,7 @@ ApplicationWindow {
             Item { Layout.fillWidth: true }
 
             Text {
-                text: "MediaForge v0.1.0"
+                text: "Active View: " + rootWindow.navItems[rootWindow.currentNavIndex].name + " • MediaFlow v0.1.0"
                 font.pixelSize: 11
                 color: "#8B93A1"
             }

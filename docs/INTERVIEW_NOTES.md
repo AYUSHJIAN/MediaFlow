@@ -83,3 +83,37 @@ A shipping container (MP4) can transport different goods (H.264 video and AAC au
 1. **Command Injection**: If a user supplies a filename containing shell metacharacters (e.g., `; rm -rf /` or `& del /f /q *`), a shell interpreter will execute the injected command.
 2. **Escaping Nightmares**: Filenames with spaces, quotes, parentheses, or unicode require fragile platform-specific escaping when passed as a single string.
 3. **Safe API**: Passing an argument list (`["ffmpeg", "-i", input_file, "-vn", output_file]`) with `shell=False` uses the operating system's native process spawning APIs (`CreateProcessW` on Windows or `execve` on POSIX), passing arguments directly without invoking a command shell.
+
+---
+
+## 2. Desktop Application Shell & UI Architecture (Phase 2)
+
+### Q8: What is the architectural difference between `StackLayout` and `StackView` in Qt Quick?
+- **`StackLayout` (from `QtQuick.Layouts`)**:
+  - Displays one child item at a time based on an explicit index (`currentIndex: 0, 1, 2, ...`).
+  - All child views are instantiated when the layout loads and retain their internal state (scroll positions, entered text, selected options) when the user switches between tabs.
+  - Ideal for fixed, persistent top-level application navigation rails (such as MediaFlow's Downloader, Converter, History, Settings).
+- **`StackView` (from `QtQuick.Controls`)**:
+  - Provides a stack-based navigation model with push, pop, and replace transitions.
+  - Dynamically creates and destroys pages as the user navigates deeper into hierarchical flows (e.g. Master-Detail navigation, wizard dialogs).
+  - Ideal for deep linear multi-step workflows where views should be discarded from memory upon completion.
+
+---
+
+### Q9: How does PySide6 marshal data between JavaScript in QML and Python?
+- **`QJSValue` vs Native Types**:
+  When Python reads a JavaScript array or object defined in QML (e.g. `rootWindow.property("navItems")`), PySide6 wraps the return value in a `QJSValue`.
+  - In C++ / Python, `QJSValue` represents an opaque handle to the V8/QML JavaScript engine heap.
+  - To convert it into standard Python dictionaries and lists, `val.toVariant()` is used.
+  - Primitive types (int, float, bool, str) are converted automatically between Python and QML. Complex Python dataclasses/dicts passed to QML via properties or signals are converted into QVariantMap/QVariantList accessible seamlessly by QML property expressions.
+
+---
+
+### Q10: How do Declarative Animations (`Behavior on color`) work in the Qt Scene Graph?
+- Instead of imperative animation loops or timer callbacks (which consume CPU and introduce frame stutter), QML provides declarative behaviors:
+  ```qml
+  Behavior on color { ColorAnimation { duration: 150 } }
+  ```
+- When `navButton.color` changes (e.g. during a hover event), the Qt Quick Scene Graph automatically interpolates the RGBA color vectors across the 150ms duration directly on the GPU render thread.
+- This keeps the UI thread free for user interaction and ensures smooth 60–120 FPS transitions.
+

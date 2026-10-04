@@ -10,10 +10,12 @@
   - [x] Create foundational automated tests (`tests/test_foundation.py`)
   - [x] Establish documentation suite in `docs/`
 
-- [ ] **PHASE 2: PySide6 + QML Application Shell**
-  - [ ] Window chrome, titlebar, frame controls
-  - [ ] Navigation sidebar (Downloader, Converter, History, Settings)
-  - [ ] View switching architecture (StackView / SwipeView)
+- [x] **PHASE 2: PySide6 + QML Application Shell**
+  - [x] Application window header & breadcrumb status
+  - [x] Navigation sidebar (Downloader, Converter, History, Settings)
+  - [x] View switching architecture (StackLayout)
+  - [x] Modular page views in qml/pages/ (Downloader, Converter, History, Settings)
+  - [x] Automated QML compilation & navigation tests (tests/test_app_shell.py)
 
 - [ ] **PHASE 3: Theme and Reusable Components**
   - [ ] Centralized QML Theme singleton (`Theme.qml`)

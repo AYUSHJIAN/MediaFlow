@@ -1,4 +1,4 @@
-"""MediaForge — Desktop Application Entrypoint.
+"""MediaFlow — Desktop Application Entrypoint.
 
 Initializes the PySide6 Qt Quick runtime, sets up application logging,
 resolves filesystem resources safely via pathlib, and instantiates
@@ -15,16 +15,16 @@ from src.backend.logging import setup_logging
 
 
 def main() -> int:
-    """Launch the MediaForge desktop application."""
+    """Launch the MediaFlow desktop application."""
     # 1. Initialize application logging
     logger = setup_logging()
-    logger.info("Starting MediaForge Desktop Workstation (Phase 1 Foundation)")
+    logger.info("Starting MediaFlow Desktop Workstation (Phase 2 Application Shell)")
 
     # 2. Configure Qt application properties
     app = QGuiApplication(sys.argv)
-    app.setApplicationName("MediaForge")
-    app.setOrganizationName("MediaForge")
-    app.setOrganizationDomain("mediaforge.local")
+    app.setApplicationName("MediaFlow")
+    app.setOrganizationName("MediaFlow")
+    app.setOrganizationDomain("mediaflow.local")
 
     # 3. Resolve paths via pathlib
     base_dir = Path(__file__).resolve().parent

@@ -1,7 +1,7 @@
-# MediaForge — Project Context
+# MediaFlow — Project Context
 
 ## Project Overview
-**MediaForge** is a desktop media utility designed for content creators, video editors, and audio engineers. It streamlines downloading, metadata extraction, format conversion, and media asset management into a unified workspace.
+**MediaFlow** is a desktop media utility designed for content creators, video editors, and audio engineers. It streamlines downloading, metadata extraction, format conversion, and media asset management into a unified workspace.
 
 ## Vision & Goals
 - **Product Experience**: Move away from primitive utility scripts or outdated desktop interfaces. Deliver an intuitive, responsive dark cinematic workstation reminiscent of Linear, DaVinci Resolve, and Adobe Premiere Pro.
@@ -42,5 +42,6 @@
   - Status Error: `#FF5C68`
 
 ## Current Status
-- **Current Phase**: Phase 1 — Project Foundation
-- **Milestone Achieved**: Directory structure established, dependency configuration created, core entry point and initial QML interface verified, test harness in place.
+- **Current Phase**: Phase 2 — PySide6 + QML Application Shell (Complete)
+- **Milestone Achieved**: Application shell operational with interactive sidebar navigation rail, dynamic StackLayout view router, 4 dedicated workstation pages (Downloader, Converter, History, Settings), and comprehensive test suite.
+- **Next Milestone**: Phase 3 — Theme and Reusable UI Components.
