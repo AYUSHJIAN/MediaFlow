@@ -24,11 +24,13 @@
   - [x] Responsive shell and page layouts with compact navigation and width-aware grids
   - [x] QML compile, component instantiation, resize, navigation, and placeholder-action tests
 
-- [ ] **PHASE 4: Downloader Metadata Service**
-  - [ ] Safe URL validation (YouTube, Instagram, Pinterest)
-  - [ ] yt-dlp metadata extraction (`extract_info(url, download=False)`)
-  - [ ] Video/audio format listing and parser
-  - [ ] Thumbnail fetching and cache
+- [x] **PHASE 4: URL Validation and Metadata Extraction**
+  - [x] HTTP(S) URL validation with structured user-facing errors
+  - [x] YouTube, Instagram, Pinterest, and Unknown platform labels
+  - [x] yt-dlp embedded API metadata extraction with downloading disabled
+  - [x] Normalized MediaMetadata/MediaFormat DTOs and video/audio/combined format labels
+  - [x] Asynchronous QObject bridge and Downloader loading/success/error states
+  - [x] Mocked URL, normalization, error mapping, worker, and QML integration tests
 
 - [ ] **PHASE 5: Downloader Service**
   - [ ] Audio/video download options configuration

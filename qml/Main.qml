@@ -61,6 +61,7 @@ ApplicationWindow {
 
                 DownloaderPage {
                     id: downloaderView
+                    metadataBridge: typeof metadataController === "undefined" ? null : metadataController
                 }
 
                 ConverterPage {

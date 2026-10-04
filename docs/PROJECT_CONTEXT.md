@@ -42,6 +42,6 @@
   - Status Error: `#FF5C68`
 
 ## Current Status
-- **Current Phase**: Phase 3 — Theme System and Reusable UI Components (Complete)
-- **Milestone Achieved**: Centralized QML palette, typography, spacing, radii, and animation tokens; reusable shell/page controls; adaptive layouts; and UI-only placeholder actions across the four workstation destinations.
-- **Next Milestone**: Phase 4 — Downloader Metadata Service. URL validation and metadata extraction are not part of this milestone.
+- **Current Phase**: Phase 4 — URL Validation and Metadata Extraction (Complete)
+- **Milestone Achieved**: HTTP(S) URL validation, platform labeling, mocked-tested yt-dlp metadata extraction without downloading, normalized media/format DTOs, asynchronous QObject bridge, and Downloader loading/success/error states.
+- **Next Milestone**: Phase 5 — Downloader Service. This phase does not download media or add conversion, progress, history, or settings backends.

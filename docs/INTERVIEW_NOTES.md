@@ -135,5 +135,27 @@ The shell uses `RowLayout`, `ColumnLayout`, `GridLayout`, and attached `Layout` 
 Controls provide hover, down, enabled, and focus feedback; the primary action also supports a loading state. Interactive items expose accessible names/descriptions, keyboard activation, and visible focus borders. Status badges pair symbols and text with color so status is not communicated by color alone.
 
 ### Q15: How is the Python/QML boundary preserved in Phase 3?
-Python configures and launches the Qt engine. QML handles layout, visual state, and input, and may emit local signals such as `fetchMediaRequested`. No bridge or service is connected to that signal in this phase, so no URL validation, network access, file I/O, or media processing occurs.
+Python configures and launches the Qt engine. QML handles layout, visual state, and input, and emits local signals such as `fetchMediaRequested`. Phase 3 kept that signal unconnected; Phase 4 adds a QObject bridge for metadata only, while media downloading and conversion remain outside the UI layer.
+
+---
+
+## 4. Metadata Service and Qt Integration (Phase 4)
+
+### Q16: Why isolate yt-dlp behind a metadata service?
+`MetadataService` owns the third-party API boundary and calls `extract_info(url, download=False)`. The bridge and QML depend on MediaFlow DTOs and safe errors rather than yt-dlp-specific dictionaries or exceptions. This keeps the integration replaceable and testable without network access.
+
+### Q17: Why normalize extractor output into DTOs?
+Third-party response keys are optional and can vary by extractor. Frozen `MediaMetadata` and `MediaFormat` DTOs provide a stable application contract, explicit video/audio/combined classifications, and sanitized fields for QML. This is a data-transfer boundary, not a persistence model.
+
+### Q18: How are Qt signals and slots used for metadata requests?
+QML invokes the `MetadataBridge` slot. A `QRunnable` performs extraction and emits a result or error signal; queued connections deliver the outcome to bridge slots on the object's GUI thread. Bindable properties then notify QML without a worker reaching into visual objects.
+
+### Q19: Why use a worker thread for metadata if extraction is mostly I/O?
+yt-dlp may wait on DNS, HTTP responses, retries, or extractor-specific requests. Keeping it off the GUI thread preserves input and painting responsiveness. The request is asynchronous, while validation remains a small synchronous check.
+
+### Q20: How do tests cover a third-party API without making live requests?
+Inject a fake `YoutubeDL` factory into `MetadataService` and assert the configured options and `download=False` call. Fake services also test the bridge's success/error signals and thread boundary. Live-site integration checks remain separate because network and platform behavior are nondeterministic.
+
+### Q21: How should errors cross the service/UI boundary?
+Map extractor and network exceptions to stable error codes and concise user messages; log technical details separately. The QML bridge exposes the mapped message and state, never a traceback or raw yt-dlp response.
 

@@ -67,11 +67,13 @@ flowchart TD
   - Declares `@Property`, `@Signal`, and `@Slot` decorators.
   - Converts primitive data between Python native types (dicts, dataclasses, lists) and QML-compatible `QVariant` types.
   - Marshals background worker events onto the main Qt event loop before triggering signals that touch UI components.
+  - `MetadataBridge` validates requests, schedules metadata work, and exposes loading, success, error, and normalized metadata properties to QML.
 
 ### 3. Application & Service Layer (`src/backend/`)
 - **Responsibilities**:
   - Encapsulates pure business logic independent of any GUI framework.
   - Can be unit-tested without launching a Qt GUI application or QML engine.
+  - The Phase 4 `downloader` package contains URL validation, platform labeling, yt-dlp metadata extraction, normalization, and domain DTOs. It does not download media.
   - Submodules:
     - `downloader`: Interacts with yt-dlp API; handles URL validation, format mapping, metadata parsing.
     - `converter`: Manages FFmpeg process execution, parameter generation, output streams.
@@ -86,6 +88,28 @@ flowchart TD
 - **Pathlib**: Strict OS-agnostic path management.
 
 ---
+
+## Phase 4 Metadata Pipeline
+
+```mermaid
+flowchart TD
+  URL[Downloader URL input] --> VALIDATE[URL validation and platform label]
+  VALIDATE --> BRIDGE[MetadataBridge QObject]
+  BRIDGE --> WORKER[QRunnable in QThreadPool]
+  WORKER --> SERVICE[MetadataService]
+  SERVICE --> YTDLP[yt-dlp extract_info download=false]
+  YTDLP --> NORMALIZE[Normalized MediaMetadata and MediaFormat DTOs]
+  NORMALIZE --> SIGNALS[Queued Qt worker signals]
+  SIGNALS --> BRIDGE
+  BRIDGE --> QML[QML loading, success, and error bindings]
+```
+
+- `validate_media_url` trims input, requires an absolute HTTP(S) URL, and returns a structured result. Platform recognition (YouTube, Instagram, Pinterest, or Unknown) is display metadata only; yt-dlp determines actual extraction support.
+- `MetadataService` uses the embedded yt-dlp Python API with `extract_info(url, download=False)`, `skip_download`, and single-item options. It does not parse CLI output or start a download.
+- `normalize_metadata` converts the variable extractor mapping to frozen application DTOs, classifies video/audio/combined formats, and builds unique descending quality labels. The raw extractor mapping never crosses the bridge.
+- `MetadataBridge` validates before queueing, rejects duplicate requests while busy, and receives queued worker outcomes on the GUI thread. QML only binds to its properties; the worker never manipulates QML items.
+- User-facing error messages are mapped to stable categories. Technical exception details are logged separately and are not sent to QML.
+- The application-level `formats` list contains normalized format descriptors, not direct media stream URLs.
 
 ## Concurrency & Threading Model
 

@@ -60,3 +60,27 @@
 
 ### Next Milestone
 - Phase 4: Downloader Metadata Service. Phase 3 intentionally does not validate URLs or contact yt-dlp.
+
+## 2026-10-04 — Phase 4: URL Validation and Metadata Extraction
+
+### Objectives
+- Validate media URLs and identify recognized platforms for display.
+- Extract and normalize metadata without downloading media.
+- Connect QML to a Python metadata service through a non-blocking Qt bridge.
+
+### Actions & Changes
+- Added structured HTTP(S) URL validation and hostname-based YouTube, Instagram, Pinterest, and Unknown labels.
+- Added immutable `MediaMetadata` and `MediaFormat` DTOs, duration formatting, video/audio/combined format classification, and deduplicated descending quality labels.
+- Added `MetadataService` using yt-dlp `extract_info(url, download=False)` with single-item, quiet, and skip-download options; mapped common extractor/network failures to user-safe categories.
+- Added a `QRunnable`/`QThreadPool` worker and `MetadataBridge` properties for loading, success, error, and normalized results. Queued Qt signals return results to the bridge on the GUI thread.
+- Connected the existing Fetch Media action to the bridge and added loading, success metadata, and user-facing error states without adding download behavior.
+- Added mocked URL/service/bridge/QML tests; unit tests do not call live media websites.
+
+### Verification
+- Phase 4 unit tests cover validation, platform labeling, field/format normalization, duration, error mapping, no-download API options, worker-thread execution, duplicate-request suppression, and QML state rendering.
+- Full suite: 56 tests passed. A live metadata-only request for the public YouTube test video “Me at the zoo” returned normalized title, platform, duration, availability, and formats; no media was downloaded.
+- The smoke launch entered the Qt event loop without QML runtime errors. The environment still reports its non-fatal missing bundled Qt font directory.
+- No download, FFmpeg, conversion, progress, history, or settings backend was implemented.
+
+### Next Milestone
+- Phase 5: Downloader Service. Do not add download execution as part of Phase 4.

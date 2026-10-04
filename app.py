@@ -12,14 +12,16 @@ from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
+from src.backend.downloader.metadata_service import MetadataService
 from src.backend.logging import setup_logging
+from src.bridge.metadata_bridge import MetadataBridge
 
 
 def main() -> int:
     """Launch the MediaFlow desktop application."""
     # 1. Initialize application logging
     logger = setup_logging()
-    logger.info("Starting MediaFlow Desktop Workstation (Phase 3 UI Foundation)")
+    logger.info("Starting MediaFlow Desktop Workstation (Phase 4 Metadata Service)")
 
     # 2. Configure Qt application properties
     os.environ.setdefault("QT_QUICK_CONTROLS_STYLE", "Basic")
@@ -38,6 +40,8 @@ def main() -> int:
 
     # 4. Initialize QML Application Engine
     engine = QQmlApplicationEngine()
+    metadata_bridge = MetadataBridge(MetadataService(), parent=engine)
+    engine.rootContext().setContextProperty("metadataController", metadata_bridge)
 
     # Safety hook: terminate immediately if QML compilation or object instantiation fails
     def on_object_created(obj, obj_url):
